@@ -14,7 +14,6 @@ function convertSequence(sequence) {
 
         if (item === nextItem - 1) {
             foundedSequence.push(item, nextItem);
-            index++;
         } else {
             let newSequence = foundedSequence.length > MIN_QTY_IN_SEQUENCE ?
                 convertToGivenString(foundedSequence) : takeExistValue(foundedSequence, item);
