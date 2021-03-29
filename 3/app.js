@@ -66,6 +66,10 @@ function translateNumberInWords(number) {
     return numberInWords[number];
   }
 
+  if (number > 100000) {
+    return;
+  }
+
   const digits = number.toString().split('');
   while (digits.length !== MAX_NUMBER_LENGTH) {
     digits.unshift('0');
@@ -95,7 +99,7 @@ function translateNumberInWords(number) {
   return words.filter(item => item).join(' ');
 }
 
-console.log(translateNumberInWords(45820));
+console.log(translateNumberInWords(190000));
 
 
 
