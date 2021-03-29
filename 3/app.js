@@ -1,8 +1,8 @@
 // Требуется создать функцию, получающую на вход число от 0 до 100 000 и показывающее его текстовый эквивалент.
 "use strict";
 
-const tenths = {
-  0: "ноль",
+const TENTHS = {
+  0: 'ноль',
   1: "один",
   2: "два",
   3: "три",
@@ -14,7 +14,7 @@ const tenths = {
   9: "девять",
 };
 
-const hundredths = {
+const HUNDREDTHS = {
   10: "десять",
   11: "одиннадцать",
   12: "двенадцать",
@@ -35,7 +35,7 @@ const hundredths = {
   90: "девяносто",
 };
 
-const thousandth = {
+const THOUSANDTH = {
   100: "сто",
   200: "двести",
   300: "триста",
@@ -47,64 +47,73 @@ const thousandth = {
   900: "девятьсот",
 };
 
-const tenThousandth = {
-  1000: "тысяча",
-  2000: "две тысячи",
-  3000: "три тысячи",
-  4000: "четрые тысячи",
-  5000: "пять тысяч",
-  6000: "шесть тысяч",
-  7000: "семь тысяч",
-  8000: "восемь тысяч",
-  9000: "девять тысяч",
-};
+const QTY_NULLS_IN_HUNDREDTHS = '00';
+const QTY_NULLS_IN_TENTHS = '0';
+const DESIGNATION_OF_ONE_THOUSAND = 'тысяча';
+const DESIGNATION_OF_SEVERAL_THOUSAND = 'тысяч';
 
-const hundredThousandth = {
-  10000: "тысяча",
-  11000: "тысяча",
-  12000: "тысяча",
-  13000: "тысяча",
-  14000: "тысяча",
-  15000: "тысяча",
-  16000: "тысяча",
-  17000: "тысяча",
-  18000: "тысяча",
-  19000: "тысяча",
-  20000: "две тысячи",
-  30000: "три тысячи",
-  40000: "четрые тысячи",
-  50000: "пять тысяч",
-  60000: "шесть тысяч",
-  70000: "семь тысяч",
-  80000: "восемь тысяч",
-  90000: "девять тысяч",
-};
-
-const numberInWordS = Object.assign(
+const numberInWords = Object.assign(
   {},
-  tenThousandth,
-  thousandth,
-  hundredths,
-  tenths
+    THOUSANDTH,
+    HUNDREDTHS,
+    TENTHS,
 );
 
-function getNumberInWords(number) {
-  const text = [];
-  numbers = number.toString().split("").reverse();
+const MAX_NUMBER_LENGTH = 6;
 
-  numbers.forEach((item, index) => {
-    if (index > 0) {
-      item *= 10 ** index;
-    }
-    Object.entries(numberInWordS).forEach(([key, value]) => {
-      if (+item === +key) {
-        text.push(value);
-      }
-    });
-  });
+function translateNumberInWords(number) {
+  if (number === 0) {
+    return numberInWords[number];
+  }
 
-  let cleanedArray = text.reverse().filter((item) => item !== "ноль");
-  return cleanedArray.join(" ");
+  const digits = number.toString().split('');
+  while (digits.length !== MAX_NUMBER_LENGTH) {
+    digits.unshift('0');
+  }
+
+  let [ hundredThousandth, tenThousandth, thousandth, hundredths, dozen, units ] = digits;
+  let words = [];
+  let designationOfThousand = DESIGNATION_OF_SEVERAL_THOUSAND;
+
+  words.push(+hundredThousandth ? numberInWords[hundredThousandth + QTY_NULLS_IN_HUNDREDTHS] + ` ${designationOfThousand}` : '');
+
+  if (words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND)) {
+    designationOfThousand = '';
+  }
+
+  words.push(+tenThousandth && numberInWords[tenThousandth + thousandth] ? (numberInWords[tenThousandth + thousandth] + ` ${designationOfThousand}`) :
+      +tenThousandth ? numberInWords[tenThousandth + 0] : '');
+
+  if (words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND)) {
+    designationOfThousand = DESIGNATION_OF_ONE_THOUSAND;
+  }
+
+  words.push(+thousandth && !numberInWords[tenThousandth + thousandth] ? numberInWords[thousandth] + ` ${designationOfThousand}`: '');
+  words.push(+hundredths ? numberInWords[hundredths + QTY_NULLS_IN_HUNDREDTHS] : '');
+  words.push(+dozen ? (numberInWords[dozen + units] || numberInWords[dozen + QTY_NULLS_IN_TENTHS]) : '');
+  words.push(+units && !numberInWords[dozen + units] ? numberInWords[units] : '');
+  return words.filter(item => item).join(' ');
 }
 
-console.log(getNumberInWords(4900));
+console.log(translateNumberInWords(45820));
+
+
+
+
+
+
+
+// function translateNumberInWords(number) {
+//   const text = [];
+//   let numbers = number.toString().split("").reverse();
+//   numbers.forEach((item, index, array) => {
+//     item *= 10 ** index;
+//     Object.entries(numberInWords).forEach(([key, value]) => {
+//       if (+item === +key) {
+//         text.push(value);
+//       }
+//     });
+//   });
+//
+//   return text.reverse().join(" ");
+// }
