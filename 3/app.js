@@ -50,24 +50,35 @@ const THOUSANDTH = {
 const QTY_NULLS_IN_HUNDREDTHS = '00';
 const QTY_NULLS_IN_TENTHS = '0';
 const DESIGNATION_OF_ONE_THOUSAND = 'тысяча';
-const DESIGNATION_OF_SEVERAL_THOUSAND = 'тысяч';
+const DESIGNATION_OF_SEVERAL_THOUSAND = 'тысяч'
+const DESIGNATION_OF_SEVERAL_THOUSAND_LESS_FIVE = 'тысячи';
 const MAX_NUMBER_SIZE = 100000;
 const MAX_NUMBER_LENGTH = 6;
 
-const numberInWords = Object.assign(
+const NUMBER_IN_WORDS = Object.assign(
   {},
     THOUSANDTH,
     HUNDREDTHS,
     TENTHS,
 );
 
+const INCORRECT_DECLENSION_WITH_NUMBER_ONE = 'один тысячи';
+const INCORRECT_DECLENSION_WITH_NUMBER_TWO = 'два тысячи';
+
+const INCORRECT_DECLENSION_OF_NUMBERS = {
+  [INCORRECT_DECLENSION_WITH_NUMBER_ONE]: 'одна тысяча',
+  [INCORRECT_DECLENSION_WITH_NUMBER_TWO]: 'две тысячи',
+};
+
+const INCORRECT_INPUT_NUMBER = 'Число не должно быть больше 100000';
+
 function translateNumberInWords(number) {
   if (number === 0) {
-    return numberInWords[number];
+    return NUMBER_IN_WORDS[number];
   }
 
   if (number > MAX_NUMBER_SIZE) {
-    return;
+    return INCORRECT_INPUT_NUMBER;
   }
 
   const digits = number.toString().split('');
@@ -79,23 +90,29 @@ function translateNumberInWords(number) {
   let words = [];
   let designationOfThousand = DESIGNATION_OF_SEVERAL_THOUSAND;
 
-  words.push(+hundredThousandth ? numberInWords[hundredThousandth + QTY_NULLS_IN_HUNDREDTHS] + ` ${designationOfThousand}` : '');
+  words.push(+hundredThousandth ? NUMBER_IN_WORDS[hundredThousandth + QTY_NULLS_IN_HUNDREDTHS] + ` ${designationOfThousand}` : '');
 
-  if (checkOnIncludesThousand(words)) {
-    designationOfThousand = '';
-  }
+  designationOfThousand = checkOnIncludesThousand(words) ? '' : designationOfThousand;
 
-  words.push(+tenThousandth && numberInWords[tenThousandth + thousandth] ? (numberInWords[tenThousandth + thousandth] + ` ${designationOfThousand}`) :
-      +tenThousandth ? numberInWords[tenThousandth + QTY_NULLS_IN_TENTHS] : '');
+  words.push(+tenThousandth && NUMBER_IN_WORDS[tenThousandth + thousandth] ? (NUMBER_IN_WORDS[tenThousandth + thousandth]) + ` ${designationOfThousand}` :
+      +tenThousandth ? NUMBER_IN_WORDS[tenThousandth + QTY_NULLS_IN_TENTHS] : '');
 
-  if (checkOnIncludesThousand(words)) {
-    designationOfThousand = DESIGNATION_OF_ONE_THOUSAND;
-  }
+  designationOfThousand = !checkOnIncludesThousand(words) && +thousandth < 5 ? DESIGNATION_OF_SEVERAL_THOUSAND_LESS_FIVE : DESIGNATION_OF_SEVERAL_THOUSAND;
 
-  words.push(+thousandth && !numberInWords[tenThousandth + thousandth] ? numberInWords[thousandth] + ` ${designationOfThousand}`: '');
-  words.push(+hundredths ? numberInWords[hundredths + QTY_NULLS_IN_HUNDREDTHS] : '');
-  words.push(+dozen ? (numberInWords[dozen + units] || numberInWords[dozen + QTY_NULLS_IN_TENTHS]) : '');
-  words.push(+units && !numberInWords[dozen + units] ? numberInWords[units] : '');
+  words.push(+thousandth && !NUMBER_IN_WORDS[tenThousandth + thousandth] ? NUMBER_IN_WORDS[thousandth] + ` ${designationOfThousand}` : '');
+  words.push(+hundredths ? NUMBER_IN_WORDS[hundredths + QTY_NULLS_IN_HUNDREDTHS] : '');
+  words.push(+dozen ? (NUMBER_IN_WORDS[dozen + units] || NUMBER_IN_WORDS[dozen + QTY_NULLS_IN_TENTHS]) : '');
+  words.push(+units && !NUMBER_IN_WORDS[dozen + units] ? NUMBER_IN_WORDS[units] : '');
+
+  words = words.map((item, index, array) => {
+    let lastNumeral = array.length - 1;
+    if (index !== lastNumeral) {
+      for (let key in INCORRECT_DECLENSION_OF_NUMBERS) {
+        item =  item.includes(key) ? INCORRECT_DECLENSION_OF_NUMBERS[key] : item;
+      }
+    }
+    return item;
+  })
   return words.filter(item => item).join(' ');
 }
 
@@ -103,7 +120,7 @@ function checkOnIncludesThousand(words) {
   return !!words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND);
 }
 
-console.log(translateNumberInWords(99999));
+console.log(translateNumberInWords(100000));
 
 
 
