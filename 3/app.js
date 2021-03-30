@@ -1,56 +1,58 @@
 // Требуется создать функцию, получающую на вход число от 0 до 100 000 и показывающее его текстовый эквивалент.
-"use strict";
+'use strict';
 
 const TENTHS = {
   0: 'ноль',
-  1: "один",
-  2: "два",
-  3: "три",
-  4: "четыре",
-  5: "пять",
-  6: "шесть",
-  7: "семь",
-  8: "восемь",
-  9: "девять",
+  1: 'один',
+  2: 'два',
+  3: 'три',
+  4: 'четыре',
+  5: 'пять',
+  6: 'шесть',
+  7: 'семь',
+  8: 'восемь',
+  9: 'девять',
 };
 
 const HUNDREDTHS = {
-  10: "десять",
-  11: "одиннадцать",
-  12: "двенадцать",
-  13: "тринадцать",
-  14: "четырнадцать",
-  15: "пятнадцать",
-  16: "шестнадцать",
-  17: "семнадцать",
-  18: "восемнадцать",
-  19: "девятнадцать",
-  20: "двадцать",
-  30: "тридцать",
-  40: "сорок",
-  50: "пятьдесят",
-  60: "шестьдесят",
-  70: "семьдесят",
-  80: "восемьдесят",
-  90: "девяносто",
+  10: 'десять',
+  11: 'одиннадцать',
+  12: 'двенадцать',
+  13: 'тринадцать',
+  14: 'четырнадцать',
+  15: 'пятнадцать',
+  16: 'шестнадцать',
+  17: 'семнадцать',
+  18: 'восемнадцать',
+  19: 'девятнадцать',
+  20: 'двадцать',
+  30: 'тридцать',
+  40: 'сорок',
+  50: 'пятьдесят',
+  60: 'шестьдесят',
+  70: 'семьдесят',
+  80: 'восемьдесят',
+  90: 'девяносто',
 };
 
 const THOUSANDTH = {
-  100: "сто",
-  200: "двести",
-  300: "триста",
-  400: "четыреста",
-  500: "пятьсот",
-  600: "шестьсот",
-  700: "семьсот",
-  800: "восемьсот",
-  900: "девятьсот",
+  100: 'сто',
+  200: 'двести',
+  300: 'триста',
+  400: 'четыреста',
+  500: 'пятьсот',
+  600: 'шестьсот',
+  700: 'семьсот',
+  800: 'восемьсот',
+  900: 'девятьсот',
 };
 
 const QTY_NULLS_IN_HUNDREDTHS = '00';
 const QTY_NULLS_IN_TENTHS = '0';
 const DESIGNATION_OF_ONE_THOUSAND = 'тысяча';
 const DESIGNATION_OF_SEVERAL_THOUSAND = 'тысяч';
+const MAX_NUMBER_SIZE = 100000;
+const MAX_NUMBER_LENGTH = 6;
 
 const numberInWords = Object.assign(
   {},
@@ -59,14 +61,12 @@ const numberInWords = Object.assign(
     TENTHS,
 );
 
-const MAX_NUMBER_LENGTH = 6;
-
 function translateNumberInWords(number) {
   if (number === 0) {
     return numberInWords[number];
   }
 
-  if (number > 100000) {
+  if (number > MAX_NUMBER_SIZE) {
     return;
   }
 
@@ -81,14 +81,14 @@ function translateNumberInWords(number) {
 
   words.push(+hundredThousandth ? numberInWords[hundredThousandth + QTY_NULLS_IN_HUNDREDTHS] + ` ${designationOfThousand}` : '');
 
-  if (words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND)) {
+  if (checkOnIncludesThousand(words)) {
     designationOfThousand = '';
   }
 
   words.push(+tenThousandth && numberInWords[tenThousandth + thousandth] ? (numberInWords[tenThousandth + thousandth] + ` ${designationOfThousand}`) :
-      +tenThousandth ? numberInWords[tenThousandth + 0] : '');
+      +tenThousandth ? numberInWords[tenThousandth + QTY_NULLS_IN_TENTHS] : '');
 
-  if (words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND)) {
+  if (checkOnIncludesThousand(words)) {
     designationOfThousand = DESIGNATION_OF_ONE_THOUSAND;
   }
 
@@ -99,8 +99,11 @@ function translateNumberInWords(number) {
   return words.filter(item => item).join(' ');
 }
 
-console.log(translateNumberInWords(190000));
+function checkOnIncludesThousand(words) {
+  return !!words.toString().includes(DESIGNATION_OF_SEVERAL_THOUSAND);
+}
 
+console.log(translateNumberInWords(99999));
 
 
 
@@ -109,7 +112,7 @@ console.log(translateNumberInWords(190000));
 
 // function translateNumberInWords(number) {
 //   const text = [];
-//   let numbers = number.toString().split("").reverse();
+//   let numbers = number.toString().split('').reverse();
 //   numbers.forEach((item, index, array) => {
 //     item *= 10 ** index;
 //     Object.entries(numberInWords).forEach(([key, value]) => {
@@ -119,5 +122,5 @@ console.log(translateNumberInWords(190000));
 //     });
 //   });
 //
-//   return text.reverse().join(" ");
+//   return text.reverse().join(' ');
 // }
